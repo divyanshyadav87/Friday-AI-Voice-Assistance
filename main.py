@@ -103,7 +103,7 @@ def processCommand(command):
         query = command.replace("search", "").strip()
         speak(f"Searching for {query}")
         webbrowser.open(f"https://www.google.com/search?q={query}")
-    elif command.lower() in ["news", "News", "tell me news","news batao"]:
+    elif command.lower() in ["news", "News", "tell me news","news batao", "news sunao"]:
         r=requests.get("https://newsapi.org/v2/top-headlines?country=us&apiKey=60d34017dcb849638b7cef7a3f269b95")
         data = r.json()
         articles = data.get("articles", [])
@@ -131,7 +131,6 @@ def processCommand(command):
                     print("Say 'next' for the next headline or 'stop' to stop.")
             except sr.UnknownValueError:
                 speak("Sorry, I didn't heard...")
-                i+=1
             except sr.RequestError:
                 speak("Network error...")
 
@@ -154,7 +153,7 @@ if __name__ == "__main__":
         try:
             with sr.Microphone() as source:
                 print("Listening for activation...")
-                audio = recognizer.listen(source, timeout=None, phrase_time_limit=1.5)
+                audio = recognizer.listen(source, timeout=None, phrase_time_limit=2)
 
             word = recognizer.recognize_google(audio, language='en-IN')
             print("Heard:", word)
@@ -166,7 +165,7 @@ if __name__ == "__main__":
                 while active:
                     with sr.Microphone() as source:
                         print("Listening...")
-                        audio = recognizer.listen(source, timeout=None, phrase_time_limit=1.5)
+                        audio = recognizer.listen(source, timeout=None, phrase_time_limit=2)
 
                     try:
                         command = recognizer.recognize_google(audio, language='en-IN')

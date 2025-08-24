@@ -9,6 +9,8 @@ import pygame
 import time
 import requests
 import google.generativeai as genai
+import datetime
+import pyjokes
 
 
 pygame.mixer.init()
@@ -32,6 +34,38 @@ async def edge_speak_async(text, voice="en-IN-NeerjaNeural", rate="+35%"):
 def speak(text, voice="en-IN-NeerjaNeural"):
     asyncio.run(edge_speak_async(text, voice))
 
+
+def get_date():
+    now = datetime.datetime.now()
+    date = now.strftime("%A, %d %B %Y")
+    # time = now.strftime("%I:%M %p")
+    speak(f"Todays date is {date}")
+
+def get_time():
+    now = datetime.datetime.now()
+    # date = now.strftime("%A, %d %B %Y")
+    time = now.strftime("%I:%M %p")
+    speak(f"the time is {time}.")
+
+def get_joke():
+    joke = pyjokes.get_joke()
+    speak(joke)
+
+import requests
+
+def get_weather(city="Delhi"):
+    api_key = "8e88b99a638fdf353304e6f9c1c1deb5"
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    response = requests.get(url).json()
+
+    if response.get("main"):
+        temp = response["main"]["temp"]
+        condition = response["weather"][0]["description"]
+        speak(f"The temperature in {city} is {temp}°C with {condition}.")
+    else:
+        speak("Sorry, I couldn't fetch the weather right now.")
+
+
 def processCommand(command):
     command = command.lower()
     print("Processing Command:", command)
@@ -54,9 +88,17 @@ def processCommand(command):
     elif command.lower() in ["linkedin kholo", "open linkedin","linkedin khol do", "linkedin kholna", "linkedin kholne", "linkedin khol", "linkedin khol de", "linkedin khol do" , "linkedin khol de do" , "linkedin", "link din", "link-din", "linkdin", "linkdin", "linkdin", "din", "din", "din", "din", "open link din", "open link-din", "open linkdin", "open linkdin", "open linkdin", "open din", "open din", "open din", "open din"]:
         speak("Opening LinkedIn")
         webbrowser.open("https://www.linkedin.com")
-    elif command.lower() in ["chatgpt kholo", "chatgpt khol do","gpt kholo", "chatgpt kholna","set gpt kholo","sad CPT kholo", "chatgpt kholne", "chatgpt khol", "chatgpt khol de", "chatgpt khol do" , "chatgpt khol de do" , "chatgpt", "chat gpt", "chat-gpt", "chat gpt", "chat gpt", "chat gpt", "gpt", "gpt", "gpt", "gpt", "open chat gpt", "open chat-gpt", "open chat gpt", "open chat gpt", "open chat gpt", "open gpt", "open gpt", "open gpt", "open gpt"]:
+    elif command.lower() in ["chatgpt kholo","chat","chat gpt kholo", "chatgpt khol do","gpt kholo", "chatgpt kholna","set gpt kholo","sad CPT kholo", "chatgpt kholne", "chatgpt khol", "chatgpt khol de", "chatgpt khol do" , "chatgpt khol de do" , "chatgpt", "chat gpt", "chat-gpt", "chat gpt", "chat gpt", "chat gpt", "gpt", "gpt", "gpt", "gpt", "open chat gpt", "open chat-gpt", "open chat gpt", "open chat gpt", "open chat gpt", "open gpt", "open gpt", "open gpt", "open gpt"]:
         speak("Opening ChatGPT")
         webbrowser.open("https://chat.openai.com")
+    elif command.lower() in ["date batao", "tell me date", "date", "aaj date kya hai"]:
+        get_date()
+    elif command.lower() in ["time batao", "time kya hua", "time", "tell me time"]:
+        get_time()
+    elif command.lower() in ["joke", "joke batao", "joke sunao", "tell me a joke","tel mi an joke"]:
+        get_joke()
+    elif command.lower() in ["weather","mausam kya hai","mausam","vedar batao","tell me weather","vedar","mausam batao"]:
+        get_weather()
     elif "search" in command:
         query = command.replace("search", "").strip()
         speak(f"Searching for {query}")
@@ -74,7 +116,7 @@ def processCommand(command):
             with sr.Microphone() as source:
                 recognizer.adjust_for_ambient_noise(source)
                 print("Listening for 'next' or 'stop' command...")
-                audio = recognizer.listen(source, timeout=None, phrase_time_limit=0.8)
+                audio = recognizer.listen(source, timeout=None, phrase_time_limit=1)
 
             try:
                 user_command = recognizer.recognize_google(audio, language='en-IN').lower()
@@ -112,7 +154,7 @@ if __name__ == "__main__":
         try:
             with sr.Microphone() as source:
                 print("Listening for activation...")
-                audio = recognizer.listen(source, timeout=None, phrase_time_limit=0.8)
+                audio = recognizer.listen(source, timeout=None, phrase_time_limit=1.5)
 
             word = recognizer.recognize_google(audio, language='en-IN')
             print("Heard:", word)
@@ -124,12 +166,12 @@ if __name__ == "__main__":
                 while active:
                     with sr.Microphone() as source:
                         print("Listening...")
-                        audio = recognizer.listen(source, timeout=None, phrase_time_limit=0.8)
+                        audio = recognizer.listen(source, timeout=None, phrase_time_limit=1.5)
 
                     try:
                         command = recognizer.recognize_google(audio, language='en-IN')
                         print("Command:", command)
-                        active = processCommand(command)  # returns False if "exit" or "stop"
+                        active = processCommand(command)
                     except sr.UnknownValueError:
                         speak("Sorry, I didn't heard")
                     except sr.RequestError:
